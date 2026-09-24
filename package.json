@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:pages": "VITE_BASE=/hanfani-sift/ VITE_STATIC_BUILD=1 tsc -b && VITE_BASE=/hanfani-sift/ VITE_STATIC_BUILD=1 vite build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

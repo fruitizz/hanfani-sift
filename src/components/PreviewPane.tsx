@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { proxied } from "../lib/routes.ts";
 import * as pdfjs from "pdfjs-dist";
 import type { AppState } from "../App.tsx";
 import type { Dict } from "../i18n.ts";
@@ -65,7 +66,7 @@ export function PreviewPane({
   const previewSrc =
     state.srcKind === "url"
       ? rawUrl
-        ? `/api/proxy?url=${encodeURIComponent(rawUrl)}`
+        ? proxied(rawUrl)
         : null
       : state.previewUrl;
   const isPdf =

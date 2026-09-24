@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { href } from "./lib/routes.ts";
 import { annualTotal, perMonth } from "./lib/pricing.ts";
 
 interface Plan {
@@ -83,7 +84,7 @@ export function Pricing() {
   return (
     <div className="docs-shell">
       <header className="docs-topbar">
-        <a className="docs-brand" href="/">
+        <a className="docs-brand" href={href("/")}>
           <div className="logo">
             <svg viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
               <circle cx="23" cy="16" r="2.6" fill="#fafaf7" />
@@ -97,10 +98,10 @@ export function Pricing() {
           <span className="docs-brand-sub">Pricing</span>
         </a>
         <div className="docs-top-actions">
-          <a className="docs-link" href="/api-docs">
+          <a className="docs-link" href={href("/api-docs")}>
             API Doc
           </a>
-          <a className="docs-link" href="/app">
+          <a className="docs-link" href={href("/app")}>
             App
           </a>
           <button

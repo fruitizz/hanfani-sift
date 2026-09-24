@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { href } from "./lib/routes.ts";
 import { GitHubStar } from "./components/GitHubStar.tsx";
 import { GITHUB_URL } from "./lib/github.ts";
 import "./landing.css";
@@ -397,7 +398,7 @@ export function Landing() {
   return (
     <div className="lp">
       <header className="lp-nav">
-        <a className="lp-brand" href="/">
+        <a className="lp-brand" href={href("/")}>
           <div className="logo">
             <svg viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
               <circle cx="23" cy="16" r="2.6" fill="#fafaf7" />
@@ -410,8 +411,8 @@ export function Landing() {
         </a>
         <nav className="lp-nav-links">
           <a href="#features">Features</a>
-          <a href="/pricing">Pricing</a>
-          <a href="/api-docs">API Doc</a>
+          <a href={href("/pricing")}>Pricing</a>
+          <a href={href("/api-docs")}>API Doc</a>
           <button
             className="themebtn"
             type="button"
@@ -421,7 +422,7 @@ export function Landing() {
           >
             {theme === "dark" ? "☀" : "☾"}
           </button>
-          <a className="lp-btn lp-btn-sm" href="/app">
+          <a className="lp-btn lp-btn-sm" href={href("/app")}>
             Open app
           </a>
         </nav>
@@ -444,10 +445,10 @@ export function Landing() {
               needs it.
             </p>
             <div className="lp-cta">
-              <a className="lp-btn" href="/app">
+              <a className="lp-btn" href={href("/app")}>
                 Try the app
               </a>
-              <a className="lp-btn lp-btn-ghost" href="/api-docs">
+              <a className="lp-btn lp-btn-ghost" href={href("/api-docs")}>
                 Read the API
               </a>
             </div>
@@ -471,7 +472,7 @@ export function Landing() {
               keys. Fork it, ship it, keep the keys.
             </p>
             <div className="lp-cta">
-              <a className="lp-btn" href="/app">
+              <a className="lp-btn" href={href("/app")}>
                 Launch Sift
               </a>
               <a className="lp-btn lp-btn-ghost" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
@@ -489,9 +490,9 @@ export function Landing() {
         <div className="lp-foot-row">
           <span>Sift</span>
           <span className="lp-foot-sep" />
-          <a href="/app">App</a>
-          <a href="/api-docs">API</a>
-          <a href="/pricing">Pricing</a>
+          <a href={href("/app")}>App</a>
+          <a href={href("/api-docs")}>API</a>
+          <a href={href("/pricing")}>Pricing</a>
         </div>
         <p className="lp-copy site-copy">
           © {new Date().getFullYear()} Sift. Built by the{" "}

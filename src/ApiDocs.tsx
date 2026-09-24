@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { href, isStaticBuild } from "./lib/routes.ts";
 import { ReadingProgress } from "./components/ReadingProgress.tsx";
 import { highlightSource } from "./lib/highlight.ts";
 
@@ -123,8 +124,12 @@ export function ApiDocs() {
   const [copied, setCopied] = useState(false);
   const [active, setActive] = useState<string>("introduction");
 
+  // The static build has no API behind its own origin, so copy-pasting a curl
+  // sample aimed at github.io would just 404. Show the placeholder host instead.
   const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://your-sift.host";
+    !isStaticBuild && typeof window !== "undefined"
+      ? window.location.origin
+      : "https://your-sift.host";
   const code = useMemo(() => samples(origin), [origin]);
 
   useEffect(() => {
@@ -169,7 +174,7 @@ export function ApiDocs() {
   return (
     <div className="docs-shell">
       <header className="docs-topbar">
-        <a className="docs-brand" href="/">
+        <a className="docs-brand" href={href("/")}>
           <div className="logo">
             <svg viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
               <circle cx="23" cy="16" r="2.6" fill="#fafaf7" />
@@ -183,13 +188,13 @@ export function ApiDocs() {
           <span className="docs-brand-sub">API Doc</span>
         </a>
         <div className="docs-top-actions">
-          <a className="docs-link" href="/pricing">
+          <a className="docs-link" href={href("/pricing")}>
             Pricing
           </a>
-          <a className="docs-link" href="/api/openapi.json">
+          <a className="docs-link" href={href("/api/openapi.json")}>
             OpenAPI
           </a>
-          <a className="docs-link" href="/app">
+          <a className="docs-link" href={href("/app")}>
             App
           </a>
           <button
@@ -392,7 +397,7 @@ export function ApiDocs() {
             <h2>OpenAPI</h2>
             <p>
               The live machine-readable spec is served at{" "}
-              <a href="/api/openapi.json">
+              <a href={href("/api/openapi.json")}>
                 <code>/api/openapi.json</code>
               </a>
               . This page is the human reference for the same surface.

@@ -679,3 +679,22 @@ pre.out { margin: 14px; padding: 15px; background: var(--well); border-radius: 8
   .docs-tr, .docs-tr.head { grid-template-columns: 1fr 1fr; }
   .docs-tr span:nth-child(3), .docs-tr span:nth-child(4) { grid-column: 1 / -1; }
 }
+
+/* Live-preview banner — shown only in the static (GitHub Pages) build, where
+   there is no backend to call. Ember tint so it reads as a notice, not an error. */
+.static-banner {
+  padding: 10px 16px;
+  background: var(--ember-tint);
+  border-bottom: 1px solid var(--line);
+  color: var(--ember-ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.static-banner strong { font-weight: 600; }
+.static-banner code {
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+  background: rgba(20, 20, 19, 0.06);
+  font-size: 12px;
+}
+.static-banner a { color: inherit; text-decoration: underline; }

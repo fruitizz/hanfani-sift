@@ -1,6 +1,16 @@
 import type { ExtractRequest, ExtractResponse } from "../../shared/types.ts";
+import { isStaticBuild } from "./routes.ts";
 
 export async function extract(req: ExtractRequest): Promise<ExtractResponse> {
+  // The GitHub Pages build is static files only: there is no /api/extract to
+  // reach and no server to hold a provider key. Say so, rather than let the
+  // fetch fail with an opaque 404 nobody can act on.
+  if (isStaticBuild) {
+    throw new Error(
+      "Live preview: static files only, so there is no server to hold an API key and no model call. " +
+        "Clone the repo and run `npm run dev` to extract for real.",
+    );
+  }
   const res = await fetch("/api/extract", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -4,9 +4,10 @@ import { App } from "./App.tsx";
 import { ApiDocs } from "./ApiDocs.tsx";
 import { Landing } from "./Landing.tsx";
 import { Pricing } from "./Pricing.tsx";
+import { currentRoute } from "./lib/routes.ts";
 import "./styles.css";
 
-const path = window.location.pathname.replace(/\/+$/, "") || "/";
+const path = currentRoute();
 const page =
   path === "/api-docs" ? (
     <ApiDocs />

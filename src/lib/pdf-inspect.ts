@@ -5,6 +5,7 @@
 
 import init, { processPdf } from "@firecrawl/pdf-inspector-wasm";
 import type { PdfInspectMeta } from "../../shared/types.ts";
+import { proxied } from "./routes.ts";
 
 const TEXT_ROUTE_MIN_CONFIDENCE = 0.6;
 
@@ -82,7 +83,7 @@ export async function inspectPdfBytes(bytes: ArrayBuffer | Uint8Array): Promise<
 /** Fetch a same-origin proxied URL and inspect it (for URL PDF sources). */
 export async function inspectPdfFromUrl(url: string): Promise<LocalPdfInspect | null> {
   try {
-    const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+    const res = await fetch(proxied(url));
     if (!res.ok) return null;
     const buf = await res.arrayBuffer();
     if (buf.byteLength === 0) return null;

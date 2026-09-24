@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { href, isStaticBuild, proxied, REPO_URL } from "./lib/routes.ts";
 import type {
   CustomField,
   DocKind,
@@ -235,7 +236,7 @@ export function App() {
         const url = normalizeSourceUrl(state.url);
         const doc: DocKind = /\.pdf(\?|$)/i.test(url) ? "pdf" : "image";
         source = { kind: "url", doc, url };
-        if (doc === "pdf") locateSrc = `/api/proxy?url=${encodeURIComponent(url)}`;
+        if (doc === "pdf") locateSrc = proxied(url);
       } else {
         if (!state.file) throw new Error("Choose a file first");
         const mime = state.file.type || "application/octet-stream";
@@ -346,6 +347,17 @@ export function App() {
 
   return (
     <div className="app-shell">
+      {isStaticBuild && (
+        <div className="static-banner" role="status">
+          <strong>Live preview.</strong> Everything here runs in the browser — upload a PDF,
+          zoom it, design a schema. The extraction itself needs a server holding an API key,
+          which GitHub Pages cannot run:{" "}
+          <a href={REPO_URL} target="_blank" rel="noreferrer">
+            clone the repo
+          </a>{" "}
+          and <code>npm run dev</code> for the real thing.
+        </div>
+      )}
       <header className="topbar">
         <div className="topbar-left">
           <button
@@ -359,7 +371,7 @@ export function App() {
               🥞
             </span>
           </button>
-          <a className="brand" href="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <a className="brand" href={href("/")} style={{ textDecoration: "none", color: "inherit" }}>
             <div className="logo">
             <svg viewBox="0 0 64 64" width="20" height="20" aria-hidden="true">
               <circle cx="23" cy="16" r="2.6" fill="#fafaf7" />
@@ -373,8 +385,8 @@ export function App() {
           </a>
         </div>
         <div className="topbar-right">
-          <a className="navlink" href="/pricing">Pricing</a>
-          <a className="navlink" href="/api-docs">API Doc</a>
+          <a className="navlink" href={href("/pricing")}>Pricing</a>
+          <a className="navlink" href={href("/api-docs")}>API Doc</a>
           {state.tokensIn + state.tokensOut > 0 && (
             <div className="tokens" tabIndex={0} onMouseEnter={() => setNow(Date.now())}>
               <span className="tk-dot" />

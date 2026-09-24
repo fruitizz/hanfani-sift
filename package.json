@@ -1,0 +1,39 @@
+{
+  "name": "doc-extractor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DocExtract — schema-driven document extraction with cited sources (Vite + React + TS + Node backend)",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c cyan,magenta \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "vite",
+    "dev:api": "tsx watch server/index.ts",
+    "build": "tsc -b && vite build",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@firecrawl/pdf-inspector": "^1.12.0",
+    "@firecrawl/pdf-inspector-wasm": "^0.1.3",
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vitest": "^3.2.7"
+  }
+}

@@ -6,6 +6,11 @@ Schema-driven document extraction with **cited sources**. Open-source by default
 **DeepSeek V4** for text-based PDFs (local classify → Markdown → extract), optional
 **Claude vision** for scans and images. No signup.
 
+**Live preview:** [fruitizz.github.io/hanfani-sift](https://fruitizz.github.io/hanfani-sift/) — the real
+interface, running in your browser, no signup and no key. Upload a PDF, zoom it, design a
+schema: it all works client-side. The extraction step itself needs a server holding an API
+key, which GitHub Pages cannot run — clone and `npm run dev` for that.
+
 **Repo:** [github.com/fruitizz/hanfani-sift](https://github.com/fruitizz/hanfani-sift) · Built by the Hanfani ecosystem.
 
 Upload a PDF/image (or URL), pick or design a schema, get **Fields** / **Plain text** /
@@ -97,3 +102,15 @@ Human docs: [http://localhost:5173/api-docs](http://localhost:5173/api-docs) · 
   **Locate** can highlight a field’s bounding box on the page.
 - Per-field **Locate** uses normalized `bbox` coordinates returned by the model.
 - **Export** from the results toolbar: Cabane (`.md`), Notion (`.md`), Google Sheets (`.csv`).
+
+## Deploying
+
+Two targets, already wired:
+
+- **GitHub Pages** — `npm run build:pages` produces a backend-less build under
+  `/hanfani-sift/` (base-path-aware links, `404.html` SPA fallback, `api/openapi.json`
+  as a real file). `.github/workflows/pages.yml` runs the tests then publishes it on
+  every push to `main`.
+- **Anywhere that runs a container** — the `Dockerfile` builds the SPA and serves it
+  together with `/api` from the Node process. Give it `DEEPSEEK_API_KEY` (and
+  `ANTHROPIC_API_KEY` for vision); it reads `PORT` if the host injects one.

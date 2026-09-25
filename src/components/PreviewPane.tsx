@@ -128,7 +128,15 @@ export function PreviewPane({
           900,
           stageRef.current?.clientWidth ? stageRef.current.clientWidth - 48 : 720,
         );
-        const scale = targetW / base.width;
+        // Fit the page on BOTH axes. Fitting width alone and letting CSS clamp
+        // the height is what put Locate on the wrong line: `.pagewrap` was
+        // capped at the stage height while the canvas kept its full one, so a
+        // box placed at y% of the wrapper landed well above the text it frames
+        // — and the bottom of the page was quietly clipped off.
+        const availH = stageRef.current?.clientHeight
+          ? stageRef.current.clientHeight - 48
+          : Infinity;
+        const scale = Math.min(targetW / base.width, availH / base.height);
         const dpr = window.devicePixelRatio || 1;
         const viewport = page.getViewport({ scale: scale * dpr });
         const cssW = viewport.width / dpr;

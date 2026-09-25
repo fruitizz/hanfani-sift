@@ -224,10 +224,13 @@ a { color: var(--ember); }
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13); border: 1px solid var(--line); border-radius: 3px;
   background: #fff; line-height: 0; overflow: hidden;
 }
-/* Locate % is relative to this box — sized to the rendered page CSS pixels. */
+/* Locate % is relative to this box, so it MUST be exactly the rendered page.
+   A max-height here clamps the wrapper without clamping the canvas inside it —
+   a percentage height resolves against the declared height, not the clamped
+   one — so the page got clipped and every highlight drifted upward. The render
+   scale fits the page to the stage instead; see PreviewPane. */
 .pagewrap {
   position: relative; display: block; line-height: 0;
-  max-width: 100%; max-height: calc(100vh - 180px);
 }
 .docframe img, .docframe .pdfcanvas {
   display: block; width: 100%; height: 100%;

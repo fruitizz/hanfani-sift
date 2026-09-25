@@ -495,7 +495,7 @@ export function Landing() {
           <a href={href("/pricing")}>Pricing</a>
         </div>
         <p className="lp-copy site-copy">
-          © {new Date().getFullYear()} Sift. Built by the{" "}
+          © {new Date().getFullYear()} Sift. Built with 💜 by the{" "}
           <a href="https://github.com/fruitizz" target="_blank" rel="noopener noreferrer">
             Hanfani ecosystem
           </a>

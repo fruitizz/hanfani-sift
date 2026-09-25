@@ -5,8 +5,8 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(1200px 520px at 78% -10%, rgba(200, 85, 42, 0.16), transparent 55%),
-    radial-gradient(900px 420px at 8% 20%, rgba(226, 121, 74, 0.08), transparent 50%),
+    radial-gradient(1200px 520px at 78% -10%, color-mix(in srgb, var(--ember) 16%, transparent), transparent 55%),
+    radial-gradient(900px 420px at 8% 20%, color-mix(in srgb, var(--ember-2) 8%, transparent), transparent 50%),
     var(--bone);
   color: var(--ink);
 }
@@ -77,7 +77,7 @@
 .lp-btn:hover {
   transform: translateY(-1px);
   background: var(--ember);
-  color: #fff;
+  color: var(--on-ember);
 }
 
 .lp-btn-sm {
@@ -277,7 +277,7 @@
 .lp-demo-box {
   position: absolute;
   border: 2px solid var(--ember);
-  background: rgba(200, 85, 42, 0.12);
+  background: color-mix(in srgb, var(--ember) 12%, transparent);
   border-radius: 4px;
   opacity: 0;
 }
@@ -303,7 +303,7 @@
   left: 0;
   right: 0;
   height: 42%;
-  background: linear-gradient(180deg, transparent, rgba(200, 85, 42, 0.1), transparent);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ember) 10%, transparent), transparent);
   animation: lp-scan 4.8s ease-in-out infinite;
   pointer-events: none;
 }
@@ -498,7 +498,7 @@
   height: 34px;
   border: 2px solid var(--ember);
   border-radius: 4px;
-  background: rgba(200, 85, 42, 0.14);
+  background: color-mix(in srgb, var(--ember) 14%, transparent);
   display: flex;
   align-items: center;
   padding-left: 10px;
@@ -615,7 +615,7 @@
 
 .lp-viz-schema li.on {
   opacity: 1;
-  border-color: rgba(200, 85, 42, 0.35);
+  border-color: color-mix(in srgb, var(--ember) 35%, transparent);
   background: var(--ember-tint);
 }
 
@@ -673,7 +673,7 @@
 }
 
 .lp-viz-node.accent {
-  border-color: rgba(200, 85, 42, 0.35);
+  border-color: color-mix(in srgb, var(--ember) 35%, transparent);
   background: var(--ember-tint);
 }
 
@@ -886,7 +886,7 @@
   padding: 48px 28px;
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(20, 20, 19, 0.96), rgba(50, 28, 18, 0.94)),
+    linear-gradient(135deg, rgba(20, 20, 19, 0.96), rgba(45, 20, 46, 0.94)),
     var(--ink);
   color: #f4f1ea;
   text-align: center;
@@ -917,7 +917,7 @@
 
 .lp-oss-band .lp-btn:hover {
   background: var(--ember-2);
-  color: #fff;
+  color: var(--on-ember);
 }
 
 .lp-oss-band .lp-btn-ghost {
@@ -1121,8 +1121,8 @@
 
 [data-theme="dark"] .lp {
   background:
-    radial-gradient(1100px 480px at 80% -8%, rgba(200, 85, 42, 0.22), transparent 55%),
-    radial-gradient(800px 380px at 10% 15%, rgba(226, 121, 74, 0.1), transparent 50%),
+    radial-gradient(1100px 480px at 80% -8%, color-mix(in srgb, var(--ember) 22%, transparent), transparent 55%),
+    radial-gradient(800px 380px at 10% 15%, color-mix(in srgb, var(--ember-2) 10%, transparent), transparent 50%),
     #121211;
 }
 

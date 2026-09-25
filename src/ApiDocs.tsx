@@ -407,7 +407,7 @@ export function ApiDocs() {
           <footer className="docs-foot">
             <div>Sift Public API · v1</div>
             <p className="site-copy">
-              © {new Date().getFullYear()} Sift. Built by the{" "}
+              © {new Date().getFullYear()} Sift. Built with 💜 by the{" "}
               <a href="https://github.com/fruitizz" target="_blank" rel="noopener noreferrer">
                 Hanfani ecosystem
               </a>

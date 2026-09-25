@@ -12,6 +12,8 @@ interface Plan {
   cta: string;
   ctaHref: string;
   featured?: boolean;
+  /** Ribbon above the card, when there is something worth saying. */
+  badge?: string;
 }
 
 const PLANS: Plan[] = [
@@ -20,6 +22,8 @@ const PLANS: Plan[] = [
     name: "Free",
     blurb: "Open source · self-host",
     monthly: 0,
+    featured: true,
+    badge: "Start here",
     features: [
       "Full Sift app & public API",
       "Local PDF classify + Markdown",
@@ -31,28 +35,12 @@ const PLANS: Plan[] = [
     ctaHref: "/app",
   },
   {
-    id: "plus",
-    name: "Plus",
-    blurb: "Hosted help when you want it",
-    monthly: 5,
-    featured: true,
-    features: [
-      "Everything in Free",
-      "Hosted extraction credits",
-      "Vision models for scans & images",
-      "Priority community support",
-      "Same cited-field pipeline",
-    ],
-    cta: "Get Plus",
-    ctaHref: "/app",
-  },
-  {
     id: "custom",
     name: "Custom",
     blurb: "Volume, on-prem, or dedicated",
     monthly: null,
     features: [
-      "Everything in Plus",
+      "Everything in Free",
       "Custom volume & SLAs",
       "On-prem / VPC options",
       "SSO & audit logs",
@@ -70,6 +58,8 @@ export function Pricing() {
       : "light",
   );
   const [annual, setAnnual] = useState(true);
+  // The billing period only means something once a plan actually has a monthly price.
+  const hasPaidPlan = PLANS.some((plan) => (plan.monthly ?? 0) > 0);
 
   useEffect(() => {
     document.title = "Sift Pricing";
@@ -120,27 +110,29 @@ export function Pricing() {
           <p className="pricing-eyebrow">Pricing</p>
           <h1>Simple plans</h1>
           <p>
-            Start free and self-host. Step up to <strong>$5/mo</strong> for hosted help, or talk to
-            us for custom volume.
+            Start free and self-host — <strong>bring your own keys</strong>, no account. Talk to us
+            when you need volume, on-prem, or SSO.
           </p>
 
-          <div className="billing-toggle" role="group" aria-label="Billing period">
-            <button type="button" className={annual ? "" : "on"} onClick={() => setAnnual(false)}>
-              Monthly
-            </button>
-            <button type="button" className={annual ? "on" : ""} onClick={() => setAnnual(true)}>
-              Annual
-              <span className="save-badge">2 months free</span>
-            </button>
-          </div>
+          {hasPaidPlan && (
+            <div className="billing-toggle" role="group" aria-label="Billing period">
+              <button type="button" className={annual ? "" : "on"} onClick={() => setAnnual(false)}>
+                Monthly
+              </button>
+              <button type="button" className={annual ? "on" : ""} onClick={() => setAnnual(true)}>
+                Annual
+                <span className="save-badge">2 months free</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="plan-grid plan-grid-3">
+        <div className="plan-grid plan-grid-2">
           {PLANS.map((plan) => {
             const pm = perMonth(plan, annual);
             return (
             <div key={plan.id} className={"plan" + (plan.featured ? " featured" : "")}>
-              {plan.featured && <span className="rec-badge">Most popular</span>}
+              {plan.badge && <span className="rec-badge">{plan.badge}</span>}
               <p className="plan-name">{plan.name}</p>
               <p className="plan-blurb">{plan.blurb}</p>
               <div className="plan-price">
@@ -176,11 +168,11 @@ export function Pricing() {
         </div>
 
         <p className="pricing-foot">
-          Free is the full open-source build: bring your own keys, no accounts. Plus is an
-          optional hosted layer. Custom covers on-prem, SSO, and higher volume.
+          Free is the full open-source build: bring your own keys, no accounts. Custom covers
+          on-prem, SSO, and higher volume.
         </p>
         <p className="site-copy" style={{ marginTop: 18 }}>
-          © {new Date().getFullYear()} Sift. Built by the{" "}
+          © {new Date().getFullYear()} Sift. Built with 💜 by the{" "}
           <a href="https://github.com/fruitizz" target="_blank" rel="noopener noreferrer">
             Hanfani ecosystem
           </a>

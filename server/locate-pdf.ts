@@ -19,9 +19,47 @@ function normalizeNeedle(s: string): string {
   return s.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
-function pageSpansFromBuffer(buffer: Buffer): Map<number, NormSpan[]> {
+/** pdf.js is only needed for the true page box — load it on demand. */
+let pdfjsPromise: Promise<typeof import("pdfjs-dist/legacy/build/pdf.mjs")> | null = null;
+
+/**
+ * The real MediaBox of every page, from pdf.js.
+ *
+ * This replaces guessing it from glyph extents floored to 595×792, and that was
+ * not a rounding error. An A4 page whose text stops short of the bottom was read
+ * as 800pt tall instead of 841.9, so every box landed ~5% too high: on the
+ * invoice that prompted this, "Northwind Logistics BV" came out 34.5pt up the
+ * page — three lines away from the text it cites. The floor also mixed A4 width
+ * with Letter height, so it could not be right for either paper size.
+ */
+async function pageSizes(buffer: Buffer): Promise<Map<number, { w: number; h: number }>> {
+  const sizes = new Map<number, { w: number; h: number }>();
+  try {
+    pdfjsPromise ??= import("pdfjs-dist/legacy/build/pdf.mjs");
+    const pdfjs = await pdfjsPromise;
+    const doc = await pdfjs.getDocument({
+      data: new Uint8Array(buffer),
+      useSystemFonts: false,
+      isEvalSupported: false,
+    }).promise;
+    try {
+      for (let p = 1; p <= doc.numPages; p++) {
+        const vp = (await doc.getPage(p)).getViewport({ scale: 1 });
+        sizes.set(p, { w: vp.width, h: vp.height });
+      }
+    } finally {
+      void doc.destroy();
+    }
+  } catch {
+    // Leave it empty; the caller falls back to glyph extents.
+  }
+  return sizes;
+}
+
+async function pageSpansFromBuffer(buffer: Buffer): Promise<Map<number, NormSpan[]>> {
   const items = extractTextWithPositions(buffer);
-  // Estimate media box from glyph extents (PDF coords are bottom-left origin).
+  const real = await pageSizes(buffer);
+  // Fallback only, for a PDF pdf.js could not open: extents of the glyphs.
   const pageMax = new Map<number, { w: number; h: number }>();
   for (const it of items) {
     const cur = pageMax.get(it.page) ?? { w: 0, h: 0 };
@@ -33,10 +71,10 @@ function pageSpansFromBuffer(buffer: Buffer): Map<number, NormSpan[]> {
   const byPage = new Map<number, NormSpan[]>();
   for (const it of items) {
     if (it.itemType !== "Text" || !it.text.trim()) continue;
+    const known = real.get(it.page);
     const dim = pageMax.get(it.page) ?? { w: 612, h: 792 };
-    // Glyph extents alone under-estimate MediaBox (sparse pages). Floor to A4/Letter.
-    const pageW = Math.max(dim.w, 595);
-    const pageH = Math.max(dim.h, 792);
+    const pageW = known?.w ?? Math.max(dim.w, 595);
+    const pageH = known?.h ?? Math.max(dim.h, 792);
     // Convert bottom-left PDF points → top-left normalized fractions.
     const span: NormSpan = {
       str: it.text,
@@ -70,8 +108,10 @@ function unionBox(spans: NormSpan[]): FieldBBox | undefined {
   const w = x2 - x1;
   const h = y2 - y1;
   if (w <= 0.001 || h <= 0.001) return undefined;
-  const padX = Math.min(0.01, w * 0.08);
-  const padY = Math.min(0.008, h * 0.15);
+  // Matches the client's framing (src/lib/locate-pdf.ts): tight enough that the
+  // box frames the quote and not the lines around it.
+  const padX = Math.min(0.005, w * 0.05);
+  const padY = Math.min(0.004, h * 0.18);
   return {
     x: Math.max(0, x1 - padX),
     y: Math.max(0, y1 - padY),
@@ -112,10 +152,13 @@ function findOnPage(spans: NormSpan[], quote: string): FieldBBox | undefined {
 }
 
 /** Attach accurate bboxes from the PDF text layer when quotes match. */
-export function locateFieldsInPdfBuffer(buffer: Buffer, fields: ExtractedField[]): ExtractedField[] {
+export async function locateFieldsInPdfBuffer(
+  buffer: Buffer,
+  fields: ExtractedField[],
+): Promise<ExtractedField[]> {
   if (!fields.length) return fields;
   try {
-    const byPage = pageSpansFromBuffer(buffer);
+    const byPage = await pageSpansFromBuffer(buffer);
     const pages = [...byPage.keys()].sort((a, b) => a - b);
     return fields.map((f) => {
       const quote = (f.source || f.value || "").trim();

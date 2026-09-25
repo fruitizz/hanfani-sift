@@ -266,7 +266,7 @@ export async function runExtraction(req: ExtractRequest): Promise<ExtractRespons
     }
   }
   if (locateBuf) {
-    fields = locateFieldsInPdfBuffer(locateBuf, fields);
+    fields = await locateFieldsInPdfBuffer(locateBuf, fields);
   }
 
   const plainText = useLocalText ? textMarkdown! : parsed.plain_text || "";

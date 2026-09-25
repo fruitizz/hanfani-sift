@@ -12,7 +12,16 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-interface TextSpan {
+/**
+ * Where the glyphs sit around the baseline, as a share of the point size.
+ * pdf.js reports a baseline and a font height but no per-font metrics, so these
+ * are the ordinary Latin proportions — close enough that a highlight frames the
+ * line rather than floating above it.
+ */
+const GLYPH_ASCENT = 0.8;
+const GLYPH_DESCENT = 0.22;
+
+export interface TextSpan {
   str: string;
   /** Normalized 0–1 page box (top-left origin). */
   x: number;
@@ -24,6 +33,37 @@ interface TextSpan {
 
 function normalizeNeedle(s: string): string {
   return s.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * The page-normalized box of one pdf.js text item.
+ *
+ * `tx` is the item transform already composed with the viewport, so `tx[4]` is
+ * the left edge in viewport units and `tx[5]` is the BASELINE — not the top of
+ * the glyphs. Two things were wrong here and both made the highlight miss:
+ *
+ * - `itemWidth` is the advance width in viewport units, with the point size
+ *   already baked in. Scaling it by the transform multiplied it by that size a
+ *   second time, so a 101pt name claimed 913pt on a 595pt page and the frame
+ *   ran off the edge, clamped, and swallowed its neighbours.
+ * - Hanging the box a whole em above the baseline framed the line too high and
+ *   left the descenders hanging below the bottom edge.
+ */
+export function spanBox(
+  tx: number[],
+  itemWidth: number,
+  itemHeight: number,
+  viewport: { width: number; height: number; scale: number },
+): { x: number; y: number; w: number; h: number } {
+  const fontH = Math.hypot(tx[2], tx[3]) || itemHeight || 8;
+  const wPx = Math.max((itemWidth || 0) * viewport.scale, fontH * 0.25);
+  const hPx = Math.max(fontH * (GLYPH_ASCENT + GLYPH_DESCENT), 4);
+  return {
+    x: tx[4] / viewport.width,
+    y: (tx[5] - fontH * GLYPH_ASCENT) / viewport.height,
+    w: wPx / viewport.width,
+    h: hPx / viewport.height,
+  };
 }
 
 /** Build searchable haystack with index map back to spans. */
@@ -45,6 +85,29 @@ function buildHaystack(spans: TextSpan[]): { hay: string; map: { span: number; o
   return { hay, map };
 }
 
+/**
+ * Narrow a span to the characters the match actually covers.
+ *
+ * pdf.js gives no per-glyph positions, so this apportions the span's width by
+ * character count. Proportional rather than exact — a run of `l`s will be over-
+ * covered and a run of `W`s under — but for a quote inside a paragraph-long
+ * item it is the difference between framing the quote and framing the paragraph.
+ */
+export function sliceSpan(span: TextSpan, range: { first: number; last: number }): TextSpan {
+  const len = normalizeNeedle(span.str).length;
+  if (len <= 0) return span;
+  const from = Math.max(0, Math.min(range.first, len - 1));
+  const to = Math.max(from, Math.min(range.last, len - 1));
+  // A match spanning the whole item needs no slicing, and slicing it would only
+  // shave the trailing advance off the last glyph.
+  if (from === 0 && to >= len - 1) return span;
+  return {
+    ...span,
+    x: span.x + (span.w * from) / len,
+    w: Math.max((span.w * (to - from + 1)) / len, span.w / len),
+  };
+}
+
 function unionBox(spans: TextSpan[]): FieldBBox | undefined {
   if (!spans.length) return undefined;
   let x1 = Infinity;
@@ -62,9 +125,11 @@ function unionBox(spans: TextSpan[]): FieldBBox | undefined {
   const w = x2 - x1;
   const h = y2 - y1;
   if (w <= 0.001 || h <= 0.001) return undefined;
-  // Pad slightly so the highlight is easy to see.
-  const padX = Math.min(0.01, w * 0.08);
-  const padY = Math.min(0.008, h * 0.15);
+  // A hair of padding so the frame reads as a frame, not as a strikethrough.
+  // Small on purpose: with the box now the width of the text, generous padding
+  // is the difference between framing the quote and framing its neighbours.
+  const padX = Math.min(0.005, w * 0.05);
+  const padY = Math.min(0.004, h * 0.18);
   return {
     x: Math.max(0, x1 - padX),
     y: Math.max(0, y1 - padY),
@@ -90,11 +155,19 @@ function findQuoteBox(pageSpans: TextSpan[], quote: string): FieldBBox | undefin
   if (idx < 0) return undefined;
 
   const end = idx + Math.min(needle.length, hay.length - idx);
-  const used = new Set<number>();
+  // Which characters of which spans the match actually covers. pdf.js often
+  // hands back a whole paragraph line as ONE item, so boxing the span outright
+  // frames 400pt of prose to point at a 13-character reference number.
+  const hits = new Map<number, { first: number; last: number }>();
   for (let i = idx; i < end && i < map.length; i++) {
-    if (map[i].offset >= 0) used.add(map[i].span);
+    const { span, offset } = map[i];
+    if (offset < 0) continue;
+    const cur = hits.get(span);
+    if (cur) cur.last = offset;
+    else hits.set(span, { first: offset, last: offset });
   }
-  return unionBox([...used].map((i) => pageSpans[i]));
+  const sliced = [...hits].map(([i, range]) => sliceSpan(pageSpans[i], range));
+  return unionBox(sliced);
 }
 
 async function collectPageSpans(doc: pdfjs.PDFDocumentProxy): Promise<Map<number, TextSpan[]>> {
@@ -109,21 +182,8 @@ async function collectPageSpans(doc: pdfjs.PDFDocumentProxy): Promise<Map<number
       const item = raw as { str: string; transform: number[]; width: number; height: number };
       // transform: [scaleX, skewY, skewX, scaleY, tx, ty] in PDF space
       const tx = pdfjs.Util.transform(viewport.transform, item.transform);
-      const fontH = Math.hypot(tx[2], tx[3]) || item.height || 8;
-      const width = (item.width || 0) * Math.hypot(tx[0], tx[1]);
-      // After viewport transform, y is top-down; tx[5] is baseline.
-      const xPx = tx[4];
-      const yPx = tx[5] - fontH;
-      const wPx = Math.max(width, fontH * 0.3);
-      const hPx = Math.max(fontH, 4);
-      spans.push({
-        str: item.str,
-        x: xPx / viewport.width,
-        y: yPx / viewport.height,
-        w: wPx / viewport.width,
-        h: hPx / viewport.height,
-        page: p,
-      });
+      const box = spanBox(tx, item.width, item.height, viewport);
+      spans.push({ str: item.str, ...box, page: p });
     }
     byPage.set(p, spans);
   }

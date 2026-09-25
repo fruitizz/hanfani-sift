@@ -2,6 +2,7 @@
   "name": "doc-extractor",
   "private": true,
   "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "description": "DocExtract — schema-driven document extraction with cited sources (Vite + React + TS + Node backend)",
   "scripts": {

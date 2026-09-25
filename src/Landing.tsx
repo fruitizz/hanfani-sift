@@ -443,8 +443,8 @@ export function Landing() {
           <div className="lp-oss-inner">
             <h2>Open source by default</h2>
             <p>
-              No accounts. No telemetry tax. Run Sift on your machine with your own DeepSeek or BYOK
-              keys. Fork it, ship it, keep the keys.
+              MIT licensed. No accounts, no telemetry tax. Run Sift on your machine with your own
+              DeepSeek or BYOK keys. Fork it, ship it, keep the keys.
             </p>
             <div className="lp-cta">
               <a className="lp-btn" href={href("/app")}>

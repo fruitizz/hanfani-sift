@@ -5,6 +5,7 @@
 
 import { processPdf } from "@firecrawl/pdf-inspector";
 import type { ExtractRequest, PdfInspectMeta } from "../shared/types.ts";
+import { FIDELITY_SAMPLE_PAGES, looksGarbled } from "../shared/text-fidelity.ts";
 import { ExtractError } from "./errors.ts";
 import { FETCH_MAX_BYTES, isBlockedHost } from "./net.ts";
 
@@ -57,18 +58,60 @@ export function canUseLocalTextRoute(
   );
 }
 
+/** pdf.js is only ever needed to second-guess the inspector — load it on demand. */
+let pdfjsPromise: Promise<typeof import("pdfjs-dist/legacy/build/pdf.mjs")> | null = null;
+
 /**
- * Run pdf-inspector on PDF bytes. Synchronous native call — typically 10–50ms classify
- * plus extraction; keep off the hot path for non-PDFs.
+ * The document's text as pdf.js reads it, sampled from the front. An independent
+ * second opinion on the inspector's Markdown; "" means pdf.js had no opinion
+ * either, which the caller must not read as a verdict.
  */
-export function inspectPdfBuffer(buffer: Buffer): {
+async function referenceText(buffer: Buffer): Promise<string> {
+  try {
+    pdfjsPromise ??= import("pdfjs-dist/legacy/build/pdf.mjs");
+    const pdfjs = await pdfjsPromise;
+    const doc = await pdfjs.getDocument({
+      data: new Uint8Array(buffer),
+      useSystemFonts: false,
+      isEvalSupported: false,
+    }).promise;
+    try {
+      const pages = Math.min(FIDELITY_SAMPLE_PAGES, doc.numPages);
+      const out: string[] = [];
+      for (let i = 1; i <= pages; i++) {
+        const content = await (await doc.getPage(i)).getTextContent();
+        out.push(content.items.map((it) => ("str" in it ? it.str : "")).join(" "));
+      }
+      return out.join("\n");
+    } finally {
+      void doc.destroy();
+    }
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Run pdf-inspector on PDF bytes, then check its Markdown against pdf.js before
+ * handing it on. The inspector can return mangled text while reporting full
+ * confidence (see shared/text-fidelity.ts); when it does, pdf.js's flat reading
+ * of the same bytes is the better answer, and the document stays off vision.
+ */
+export async function inspectPdfBuffer(buffer: Buffer): Promise<{
   inspect: PdfInspectMeta;
   markdown?: string;
-} {
+  markdownSource?: "pdf-inspector" | "pdfjs-fallback";
+}> {
   const result = processPdf(buffer);
   const inspect = toMeta(result);
   const markdown = result.markdown?.trim() ? result.markdown : undefined;
-  return { inspect, markdown };
+
+  const reference = await referenceText(buffer);
+  if (looksGarbled(markdown, reference)) {
+    console.warn("[pdf-local] inspector Markdown failed the pdf.js cross-check — using pdf.js text");
+    return { inspect, markdown: reference, markdownSource: "pdfjs-fallback" };
+  }
+  return { inspect, markdown, markdownSource: markdown ? "pdf-inspector" : undefined };
 }
 
 /** Decide local Markdown vs vision/OCR routing from an inspect result. */
@@ -170,7 +213,7 @@ export async function resolvePdfRoute(req: ExtractRequest): Promise<PdfRoute | n
 
   const pdfBase64 = buffer.toString("base64");
   try {
-    const { inspect, markdown } = inspectPdfBuffer(buffer);
+    const { inspect, markdown } = await inspectPdfBuffer(buffer);
     // Prefer richer server markdown; fall back to client if server returned none.
     return routeFromInspect(inspect, markdown ?? clientMd, pdfBase64);
   } catch (e) {

@@ -37,12 +37,12 @@ instance ([Run it](#run-it)) or your own deployment.
   "fields": [{
     "key": "total_due",
     "value": "$1,240.00",
-    "source": "Total due $1,240.00",              // the sentence it came from
-    "confidence": "high",
+    "source": "Total due $1,240.00",   // the sentence it came from
+    "confidence": "high",              // high | medium | low
     "bbox": { "x": 0.59, "y": 0.57, "w": 0.24, "h": 0.02, "page": 1 }
   }],
   "plainText": "…",
-  "json": { "total_due": { "value": "$1,240.00", "…": "…" } }   // same fields, keyed
+  "json": { "total_due": { "value": "…" } }   // same fields, keyed
 }
 ```
 

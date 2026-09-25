@@ -57,6 +57,12 @@
   background: var(--well);
 }
 
+.lp-nav-links > a:not(.lp-btn).on {
+  color: var(--ember-ink);
+  background: var(--ember-tint);
+  font-weight: 600;
+}
+
 .lp-btn {
   display: inline-flex;
   align-items: center;
@@ -1175,6 +1181,39 @@
   }
   .lp-oss-band { margin: 40px 16px 0; padding: 36px 20px; }
 }
+
+/* Below this the brand, four links, the theme button and the Open app pill no
+   longer fit on one line — they were already overflowing at three. Let the bar
+   run over two rows rather than push "Open app" off the edge. */
+@media (max-width: 660px) {
+  .lp-nav {
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px 16px 12px;
+    gap: 8px 12px;
+  }
+  .lp-nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+  }
+  .lp-nav-links > a:not(.lp-btn) {
+    font-size: 12.5px;
+    padding: 6px 7px;
+  }
+  /* Features is an anchor on the landing, which a phone reaches by scrolling.
+     Dropping it is what buys the last row its Open app button. */
+  .lp-nav-links > a[href$="#features"] {
+    display: none;
+  }
+  .lp-nav-links .lp-btn-sm {
+    margin-left: 4px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .lp-hero-copy,

@@ -188,6 +188,9 @@ export function ApiDocs() {
           <span className="docs-brand-sub">API Doc</span>
         </a>
         <div className="docs-top-actions">
+          <a className="docs-link" href={href("/solutions")}>
+            Solutions
+          </a>
           <a className="docs-link" href={href("/pricing")}>
             Pricing
           </a>

@@ -385,6 +385,7 @@ export function App() {
           </a>
         </div>
         <div className="topbar-right">
+          <a className="navlink" href={href("/solutions")}>Solutions</a>
           <a className="navlink" href={href("/pricing")}>Pricing</a>
           <a className="navlink" href={href("/api-docs")}>API Doc</a>
           {state.tokensIn + state.tokensOut > 0 && (

@@ -1,0 +1,357 @@
+/* Solutions page — sits on top of landing.css, which owns the nav, the
+   buttons, the hero type scale and the footer. Everything here is the page's
+   own furniture: the three shape cards, the industry picker, the common band. */
+
+.lp-sol-hero {
+  padding-bottom: 8px;
+}
+
+.lp-sol-hero .lp-hero-copy {
+  max-width: 720px;
+  margin-bottom: 0;
+}
+
+/* ---------- Section headers ---------- */
+
+.lp-sol-head {
+  max-width: 640px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+
+.lp-sol-head .lp-row-eyebrow {
+  margin-bottom: 12px;
+}
+
+.lp-sol-head h2 {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.lp-sol-head-body {
+  margin: 14px 0 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- Three company shapes ---------- */
+
+.lp-sol-shapes,
+.lp-sol-picker-band,
+.lp-sol-common {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 72px 28px 0;
+  width: 100%;
+}
+
+.lp-sol-shape-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.lp-sol-shape {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.14s ease, transform 0.14s ease;
+}
+
+.lp-sol-shape:hover {
+  border-color: color-mix(in srgb, var(--ember) 32%, transparent);
+  transform: translateY(-2px);
+}
+
+.lp-sol-shape h3 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.lp-sol-shape > p {
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.lp-sol-shape ul {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.lp-sol-shape li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.lp-sol-shape li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+}
+
+/* ---------- Industry picker ---------- */
+
+.lp-sol-picker {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.lp-sol-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lp-sol-tabs button {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 10px;
+  padding: 11px 14px;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.lp-sol-tabs button:hover {
+  background: var(--well);
+  color: var(--ink);
+}
+
+.lp-sol-tabs button.on {
+  background: var(--ember-tint);
+  border-color: color-mix(in srgb, var(--ember) 30%, transparent);
+  color: var(--ember-ink);
+  font-weight: 600;
+}
+
+.lp-sol-tabs button:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+
+.lp-sol-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 26px 26px 24px;
+  animation: lp-sol-fade 0.28s ease both;
+}
+
+@keyframes lp-sol-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.lp-sol-situation {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  max-width: 54ch;
+}
+
+.lp-sol-panel h3 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.lp-sol-panel h3 span {
+  margin-left: 8px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 12px;
+}
+
+.lp-sol-docs {
+  margin-top: 26px;
+}
+
+.lp-sol-docs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lp-sol-docs li {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--well);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.lp-sol-schema {
+  margin-top: 26px;
+}
+
+.lp-sol-schema ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+}
+
+.lp-sol-schema li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: var(--well);
+}
+
+.lp-sol-schema code {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lp-sol-schema em {
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ember-ink);
+  background: var(--ember-tint);
+  padding: 1px 7px;
+  border-radius: 20px;
+  flex: none;
+}
+
+.lp-sol-payoff {
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- Common ground ---------- */
+
+.lp-sol-common-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.lp-sol-common-grid h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  padding-top: 16px;
+  border-top: 2px solid var(--ember);
+}
+
+.lp-sol-common-grid p {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- Dark ---------- */
+
+[data-theme="dark"] .lp-sol-shape,
+[data-theme="dark"] .lp-sol-panel {
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .lp-sol-shapes,
+  .lp-sol-picker-band,
+  .lp-sol-common {
+    padding: 48px 16px 0;
+  }
+  .lp-sol-shape-grid,
+  .lp-sol-common-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .lp-sol-picker {
+    grid-template-columns: 1fr;
+  }
+  .lp-sol-tabs {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .lp-sol-tabs button {
+    padding: 8px 13px;
+    font-size: 13px;
+    border-color: var(--line);
+  }
+  .lp-sol-schema ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-sol-panel {
+    animation: none;
+  }
+  .lp-sol-shape:hover {
+    transform: none;
+  }
+}

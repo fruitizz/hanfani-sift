@@ -88,6 +88,9 @@ export function Pricing() {
           <span className="docs-brand-sub">Pricing</span>
         </a>
         <div className="docs-top-actions">
+          <a className="docs-link" href={href("/solutions")}>
+            Solutions
+          </a>
           <a className="docs-link" href={href("/api-docs")}>
             API Doc
           </a>

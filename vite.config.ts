@@ -14,13 +14,20 @@ const BASE = process.env.VITE_BASE ?? "/";
 /** True for the backend-less GitHub Pages build (see src/lib/routes.ts). */
 const STATIC_BUILD = process.env.VITE_STATIC_BUILD === "1";
 
+/** SPA routes that must exist as real files on a static host (see below). */
+const STATIC_ROUTES = ["app", "solutions", "pricing", "api-docs"];
+
 /**
- * Two things the Node server does at runtime that a static host cannot, done
+ * Three things the Node server does at runtime that a static host cannot, done
  * once at build time instead:
  *
- * - `404.html` — GitHub Pages has no SPA fallback, so a deep link like
- *   /app 404s. Pages serves 404.html for any unmatched path, and since the SPA
- *   routes on `location.pathname`, a copy of index.html there *is* the fallback.
+ * - One `index.html` per route — the 404.html fallback below makes a deep link
+ *   *render* correctly, but Pages still answers it with a 404 status. A browser
+ *   doesn't care; a link crawler does, and a shared /solutions link that answers
+ *   404 gets no preview card. A real file at each route answers 200.
+ * - `404.html` — the fallback for anything not in that list. Pages serves it for
+ *   any unmatched path, and since the SPA routes on `location.pathname`, a copy
+ *   of index.html there *is* the fallback.
  * - `api/openapi.json` — served by the Hono app in production. The docs page
  *   links to it, so the static build ships it as a real file.
  */
@@ -31,7 +38,12 @@ function staticHostFallbacks(): Plugin {
     async closeBundle() {
       if (!STATIC_BUILD) return;
       const dist = resolve(import.meta.dirname, "dist");
-      copyFileSync(resolve(dist, "index.html"), resolve(dist, "404.html"));
+      const index = resolve(dist, "index.html");
+      for (const route of STATIC_ROUTES) {
+        mkdirSync(resolve(dist, route), { recursive: true });
+        copyFileSync(index, resolve(dist, route, "index.html"));
+      }
+      copyFileSync(index, resolve(dist, "404.html"));
       const { openApiSpec } = await import("./server/openapi.ts");
       mkdirSync(resolve(dist, "api"), { recursive: true });
       writeFileSync(resolve(dist, "api/openapi.json"), JSON.stringify(openApiSpec, null, 2));
